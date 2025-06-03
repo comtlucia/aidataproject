@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 
 st.set_page_config(layout="wide")
 st.title("🚢 타이타닉 생존자 분석 대시보드")
@@ -16,7 +17,7 @@ df = load_data()
 # 기본 정보 표시
 st.markdown(f"""
 - 전체 승객 수: **{len(df)}명**
-- 분석 기준 컬럼: `Sex`, `Pclass`, `Survived`, `Age`, `Fare`
+- 분석 기준 컬럼: `Sex`, `Pclass`, `Survived`, `Age`, `Fare`, `SibSp`, `Parch`
 """)
 
 # 성별 생존자 수 시각화
@@ -91,6 +92,22 @@ with col2:
 st.plotly_chart(fig_age, use_container_width=True)
 st.plotly_chart(fig_fare, use_container_width=True)
 
+# 📌 수치형 변수 간 상관관계 히트맵
+st.markdown("## 📊 수치형 변수 간 상관관계 분석")
+
+num_cols = ["Survived", "Pclass", "Age", "SibSp", "Parch", "Fare"]
+df_corr = df[num_cols].dropna().corr()
+
+fig_corr = px.imshow(
+    df_corr,
+    text_auto=".2f",
+    color_continuous_scale="RdBu_r",
+    title="📌 상관관계 히트맵 (Survived 중심)"
+)
+fig_corr.update_layout(height=500)
+
+st.plotly_chart(fig_corr, use_container_width=True)
+
 # 인사이트 요약
 st.markdown("## 🧠 분석 인사이트 요약")
 st.info("""
@@ -98,4 +115,5 @@ st.info("""
 - 🏨 1등급 객실 승객의 생존율이 가장 높고, 3등급 객실의 생존율은 낮았습니다.
 - 📊 나이 분포에서 어린 승객의 생존 가능성이 다소 높게 나타났습니다.
 - 💰 요금이 높을수록 생존율도 높아지는 경향이 있었습니다.
+- 🔗 상관관계 분석 결과, `Pclass`와 `Fare`는 강한 음의 상관, `SibSp`와 `Parch`는 강한 양의 상관을 보였습니다.
 """)
