@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # 🔗 GitHub에 올린 raw 파일 주소를 아래에 입력
-url = "titanic.csv"
+url = "https://github.com/comtlucia/aidataproject/blob/main/titanic.csv"
 df = pd.read_csv(url)
 
 # ✅ 1. 기본 정보
