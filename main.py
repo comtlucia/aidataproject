@@ -62,7 +62,7 @@ if uploaded_file:
 
     for (var1, var2), value in top_pairs.items():
         st.markdown(f"### 📈 **{var1} vs {var2}** (상관계수: {value:.2f})")
-        fig = px.scatter(df, x=var1, y=var2, trendline="ols", title=f"{var1} vs {var2} 관계")
+        fig = px.scatter(df, x=var1, y=var2, title=f"{var1} vs {var2} 관계")  # trendline 제거됨
         st.plotly_chart(fig, use_container_width=True)
 
     # ---------------- 기본 시각화 ---------------- #
