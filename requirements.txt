@@ -1,4 +1,5 @@
-folium
-streamlit_folium
-plotly
+matplotlib
+seaborn
 pandas
+plotly
+
