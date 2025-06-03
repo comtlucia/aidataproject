@@ -19,6 +19,18 @@ st.markdown(f"""
 - 전체 승객 수: **{len(df)}명**
 - 분석 기준 컬럼: `Sex`, `Pclass`, `Survived`, `Age`, `Fare`, `SibSp`, `Parch`
 """)
+# 데이터 요약 출력
+st.markdown("## 🧾 데이터 요약 정보")
+st.dataframe(df.describe(include="all").transpose(), use_container_width=True)
+
+# 결측치 정보 요약
+st.markdown("### 🔍 결측치 현황")
+missing = df.isnull().sum()
+missing = missing[missing > 0].sort_values(ascending=False)
+if not missing.empty:
+    st.dataframe(missing.to_frame("결측치 수"), use_container_width=True)
+else:
+    st.success("결측치가 없습니다.")
 
 # 성별 생존자 수 시각화
 sex_surv = df.groupby(['Sex', 'Survived']).size().reset_index(name='Count')
