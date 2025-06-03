@@ -1,51 +1,101 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import matplotlib
-import platform
-import io
-from matplotlib import font_manager, rc
+import plotly.graph_objects as go
 
-# ✅ Malgun Gothic 폰트 경로 직접 지정
-font_path = "C:/Windows/Fonts/malgun.ttf"
-font_name = font_manager.FontProperties(fname=font_path).get_name()
-rc('font', family=font_name)
-matplotlib.rcParams['axes.unicode_minus'] = False
-# ✅ 데이터 불러오기 (GitHub의 RAW CSV)
-url = "https://raw.githubusercontent.com/comtlucia/aidataproject/main/titanic.csv"
-df = pd.read_csv(url)
+st.set_page_config(layout="wide")
+st.title("🚢 타이타닉 생존자 분석 대시보드")
 
-st.title("🚢 타이타닉 데이터 시각화")
+# 데이터 불러오기
+@st.cache_data
+def load_data():
+    url = "https://raw.githubusercontent.com/comtlucia/aidataproject/main/titanic.csv"
+    return pd.read_csv(url)
 
-# ✅ 성별 생존자 수 그래프 생성
-fig1, ax1 = plt.subplots(figsize=(3, 2))
-sns.countplot(data=df, x="Sex", hue="Survived", ax=ax1)
-ax1.set_title("성별 생존자 수")
-ax1.set_xlabel("성별")
-ax1.set_ylabel("명 수")
-buf1 = io.BytesIO()
-fig1.savefig(buf1, format="png", bbox_inches="tight", dpi=100)
-buf1.seek(0)
+df = load_data()
 
-# ✅ 객실 등급별 생존율 그래프 생성
+# 기본 정보 표시
+st.markdown(f"""
+- 전체 승객 수: **{len(df)}명**
+- 분석 기준 컬럼: `Sex`, `Pclass`, `Survived`, `Age`, `Fare`
+""")
+
+# 성별 생존자 수 시각화
+sex_surv = df.groupby(['Sex', 'Survived']).size().reset_index(name='Count')
+
+fig_sex = go.Figure()
+for value in sorted(sex_surv["Survived"].unique()):
+    data = sex_surv[sex_surv["Survived"] == value]
+    fig_sex.add_trace(go.Bar(
+        x=data["Sex"],
+        y=data["Count"],
+        name="생존" if value == 1 else "사망",
+        text=data["Count"],
+        textposition="outside"
+    ))
+
+fig_sex.update_layout(
+    title="👨‍👩‍👧‍👦 성별 생존자 수",
+    barmode="group",
+    height=400,
+    xaxis_title="성별",
+    yaxis_title="명 수"
+)
+
+# 객실 등급별 생존율
 class_surv = df.groupby("Pclass")["Survived"].mean().reset_index()
-fig2, ax2 = plt.subplots(figsize=(3, 2))
-sns.barplot(data=class_surv, x="Pclass", y="Survived", ax=ax2)
-ax2.set_title("객실 등급별 생존율")
-ax2.set_xlabel("등급")
-ax2.set_ylabel("생존율")
-buf2 = io.BytesIO()
-fig2.savefig(buf2, format="png", bbox_inches="tight", dpi=100)
-buf2.seek(0)
+class_surv["Survived"] = (class_surv["Survived"] * 100).round(2)
 
-# ✅ Streamlit 화면에 나란히 출력
+fig_class = go.Figure(go.Bar(
+    x=class_surv["Pclass"].astype(str),
+    y=class_surv["Survived"],
+    text=class_surv["Survived"].astype(str) + "%",
+    textposition="outside",
+    marker_color="lightcoral"
+))
+fig_class.update_layout(
+    title="🏨 객실 등급별 생존율",
+    height=400,
+    xaxis_title="객실 등급",
+    yaxis_title="생존율 (%)"
+)
+
+# 나이 분포: 생존 vs 사망
+df_age = df.dropna(subset=["Age"])
+fig_age = go.Figure()
+fig_age.add_trace(go.Box(y=df_age[df_age["Survived"] == 1]["Age"], name="생존자", boxpoints="outliers"))
+fig_age.add_trace(go.Box(y=df_age[df_age["Survived"] == 0]["Age"], name="사망자", boxpoints="outliers"))
+fig_age.update_layout(
+    title="📈 나이에 따른 생존 여부 분포",
+    yaxis_title="나이",
+    height=400
+)
+
+# 요금 분포: 생존 vs 사망
+df_fare = df[df["Fare"] < 200]  # 이상치 제거
+fig_fare = go.Figure()
+fig_fare.add_trace(go.Box(y=df_fare[df_fare["Survived"] == 1]["Fare"], name="생존자"))
+fig_fare.add_trace(go.Box(y=df_fare[df_fare["Survived"] == 0]["Fare"], name="사망자"))
+fig_fare.update_layout(
+    title="💰 요금(Fare)에 따른 생존 여부 분포 (200 이하)",
+    yaxis_title="요금",
+    height=400
+)
+
+# 레이아웃 배치
 col1, col2 = st.columns(2)
-
 with col1:
-    st.subheader("👥 성별 생존자 수")
-    st.image(buf1)
-
+    st.plotly_chart(fig_sex, use_container_width=True)
 with col2:
-    st.subheader("🏨 객실 등급 생존율")
-    st.image(buf2)
+    st.plotly_chart(fig_class, use_container_width=True)
+
+st.plotly_chart(fig_age, use_container_width=True)
+st.plotly_chart(fig_fare, use_container_width=True)
+
+# 인사이트 요약
+st.markdown("## 🧠 분석 인사이트 요약")
+st.info("""
+- 👩 여성의 생존율이 남성보다 매우 높았습니다.
+- 🏨 1등급 객실 승객의 생존율이 가장 높고, 3등급 객실의 생존율은 낮았습니다.
+- 📊 나이 분포에서 어린 승객의 생존 가능성이 다소 높게 나타났습니다.
+- 💰 요금이 높을수록 생존율도 높아지는 경향이 있었습니다.
+""")
