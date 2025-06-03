@@ -7,10 +7,6 @@ import platform
 # 운영체제에 따라 한글 폰트 설정
 if platform.system() == 'Windows':
     matplotlib.rc('font', family='Malgun Gothic')  # 윈도우 기본 한글 폰트
-elif platform.system() == 'Darwin':  # macOS
-    matplotlib.rc('font', family='AppleGothic')
-else:
-    matplotlib.rc('font', family='NanumGothic')  # 리눅스 서버/Colab 등
 
 # 마이너스 기호 깨짐 방지
 matplotlib.rcParams['axes.unicode_minus'] = False
