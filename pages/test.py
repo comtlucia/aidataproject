@@ -5,19 +5,13 @@ import seaborn as sns
 import matplotlib
 import platform
 import io
+from matplotlib import font_manager, rc
 
-st.title("🚢 GitHub에서 타이타닉 데이터 불러오기")
-
-# ✅ 한글 폰트 설정 (Windows 환경 기준)
-if platform.system() == 'Windows':
-    matplotlib.rcParams['font.family'] = 'Malgun Gothic'
-elif platform.system() == 'Darwin':
-    matplotlib.rcParams['font.family'] = 'AppleGothic'
-else:
-    matplotlib.rcParams['font.family'] = 'NanumGothic'
-
+# ✅ Malgun Gothic 폰트 경로 직접 지정
+font_path = "C:/Windows/Fonts/malgun.ttf"
+font_name = font_manager.FontProperties(fname=font_path).get_name()
+rc('font', family=font_name)
 matplotlib.rcParams['axes.unicode_minus'] = False
-
 # ✅ 데이터 불러오기 (GitHub의 RAW CSV)
 url = "https://raw.githubusercontent.com/comtlucia/aidataproject/main/titanic.csv"
 df = pd.read_csv(url)
