@@ -1,15 +1,15 @@
-import matplotlib
-import matplotlib.pyplot as plt
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib
 import platform
 
-# 운영체제에 따라 한글 폰트 설정
+# 한글 폰트 설정 (윈도우 전용)
 if platform.system() == 'Windows':
-    matplotlib.rc('font', family='Malgun Gothic')
+    matplotlib.rcParams['font.family'] = 'Malgun Gothic'
 
-# ✅ 마이너스 부호 깨짐 방지
+# 마이너스 깨짐 방지
 matplotlib.rcParams['axes.unicode_minus'] = False
 
 # 페이지 세팅
