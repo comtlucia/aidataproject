@@ -7,10 +7,11 @@ import platform
 
 # 운영체제에 따라 한글 폰트 설정
 if platform.system() == 'Windows':
-    matplotlib.rc('font', family='Malgun Gothic')  # 윈도우 기본 한글 폰트
+    matplotlib.rc('font', family='Malgun Gothic')
 
-# 마이너스 기호 깨짐 방지
+# ✅ 마이너스 부호 깨짐 방지
 matplotlib.rcParams['axes.unicode_minus'] = False
+
 # 페이지 세팅
 st.set_page_config(page_title="🚢 타이타닉 생존자 분석", layout="wide")
 
